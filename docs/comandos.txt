@@ -1,0 +1,10 @@
+----------COMPASS-----------
+mongodb+srv://Admin:Admin@cluster0.8dmzz.mongodb.net/movie_database
+
+----------SHELL------------
+mongo "mongodb+srv://cluster0.8dmzz.mongodb.net/myFirstDatabase" --username Admin
+
+
+---------Import/Esxport----------
+mongoimport --uri mongodb+srv://Admin:Admin@cluster0.8dmzz.mongodb.net/<DATABASE> --collection <COLLECTION> --type <FILETYPE> --file <FILENAME>
+mongoexport --uri mongodb+srv://Admin:Admin@cluster0.8dmzz.mongodb.net/<DATABASE> --collection <COLLECTION> --type <FILETYPE> --out <FILENAME>
