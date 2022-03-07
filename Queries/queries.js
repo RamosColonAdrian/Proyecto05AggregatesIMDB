@@ -92,7 +92,7 @@ db.credits.aggregate([
 ])
 */
 
-//Hace falta saber cuantas personas recomiendan o no, las peliculas del señor de los anillos y todo el staf que participa
+//Hace falta saber cuantas personas recomiendan o no, las peliculas del señor de los anillos y todo el staf que participa en ellas
 db.movie_dataset.aggregate([
     {
         $match: {
@@ -158,38 +158,58 @@ db.movie_dataset.aggregate([
     }
 ]).pretty()
 
-db.credits.aggregate([
-    {
-        $match: {
-            'movies.cast.name': 'Tom Hanks'
-        }
-    }, 
+//se necesita la pelicula mas recomendada por los comentarios de los espectadores, así como sus veneficios
+db.movie_dataset.aggregate([
     {
         $lookup: {
-            from: 'movie_dataset',
-            localField: '_id',
-            foreignField: '_id',
-            as: 'movies_info'
+            from: 'coments',
+            localField: 'id',
+            foreignField: 'movie_id',
+            as: 'comments'
         }
     }, 
     {
-        $unwind: {
-            path: '$movies_info'
-        }
-    },
-    {
-        $project: {
-            _id: 0,
-            date: '$movies_info.releasedate',
-            movieTile: '$movies_info.original_title',
-            profits: {
-                $subtract: ["$movies_info.revenue", "$movies_info.budget"]
+        $match: {
+            comments: {
+                $not: {
+                    $size: 0
+                }
             }
         }
     }, 
     {
-        $sort: {
-            profits: -1
+        $project: {
+            _id: 0,
+            original_title: 1,
+            prfoits: {
+                $subtract: ["$revenue",
+                    "$budget"
+                ]
+            },
+            recommended: {
+                $reduce: {
+                    input: "$comments",
+                    initialValue: 1,
+                    in: {
+                        $cond: {
+                            if: "$comments.recommended:true",
+                            then: {
+                                $sum: 1
+                            },
+                            else: "pepe"
+                        }
+                    }
+                }
+            }
         }
+    },
+    {
+        $sort:{
+            "recommended":1,
+            
+        }
+    },
+    {
+        $limit:1
     }
 ])
